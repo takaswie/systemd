@@ -64,6 +64,31 @@ static const char *modalias_usb(sd_device *dev, char *s, size_t size) {
         return s;
 }
 
+static const char *generate_custom_key_for_fw_node(sd_device *dev, char *s, size_t size) {
+        const char *vendor_id;
+        const char *model_id;
+        const char *units;
+
+        if (sd_device_get_sysattr_value(dev, "vendor", &vendor_id) < 0)
+                return NULL;
+        if (sd_device_get_sysattr_value(dev, "units", &units) < 0)
+                return NULL;
+
+        /* These custom keys are used in 'hwdb.d/80-ieee1394-unit-function.hwdb'. */
+        if (sd_device_get_sysattr_value(dev, "model", &model_id) >= 0) {
+                snprintf(s, size, "ieee1394:node:ven%smo%sunits%s", vendor_id, model_id, units);
+        } else {
+                /*
+                 * Some node have configuration ROM against standard layout defined by 1394 Trading
+                 * Association. For the case, model_id is not available and another format of custom
+                 * key is used.
+                 */
+                snprintf(s, size, "ieee1394:node:ven%sunits%s", vendor_id, units);
+        }
+
+        return s;
+}
+
 static int udev_builtin_hwdb_search(sd_device *dev, sd_device *srcdev,
                                     const char *subsystem, const char *prefix,
                                     const char *filter, bool test) {
@@ -107,7 +132,8 @@ static int udev_builtin_hwdb_search(sd_device *dev, sd_device *srcdev,
                          */
                         last = true;
 
-                        /* No hwdb entry is available since fw node has no modalias. */
+                        /* Use custom modalias-like key to pick up entry in hwdb for node device. */
+                        modalias = generate_custom_key_for_fw_node(d, s, sizeof(s));
                 }
 
                 if (modalias) {
