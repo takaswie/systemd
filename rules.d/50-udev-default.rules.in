@@ -13,6 +13,9 @@ SUBSYSTEM=="rtc", KERNEL=="rtc0", SYMLINK+="rtc", OPTIONS+="link_priority=-100"
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", IMPORT{builtin}="usb_id", IMPORT{builtin}="hwdb --subsystem=usb"
 ENV{MODALIAS}!="", IMPORT{builtin}="hwdb --subsystem=$env{SUBSYSTEM}"
 
+# Custom keys are used for fw node device to pick up hwdb entry. For fw unit device, modalias is available.
+SUBSYSTEM=="firewire", ENV{MODALIAS}=="", IMPORT{builtin}="hwdb --subsystem=firewire"
+
 ACTION!="add", GOTO="default_end"
 
 SUBSYSTEM=="tty", KERNEL=="ptmx", GROUP="tty", MODE="0666"
@@ -49,12 +52,7 @@ SUBSYSTEM=="sound", GROUP="audio", \
 
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0664"
 
-SUBSYSTEM=="firewire", TEST=="units", TEST=="model", \
-  IMPORT{builtin}="hwdb 'ieee1394:node:ven$attr{vendor}mo$attr{model}units$attr{units}'"
-
-SUBSYSTEM=="firewire", TEST=="units", TEST!="model", \
-  IMPORT{builtin}="hwdb 'ieee1394:node:ven$attr{vendor}units$attr{units}'"
-
+# These variables come from 'hwdb.d/80-ieee1394-unit-function.hwdb'.
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_MIDI}=="1", GROUP="audio"
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_AUDIO}=="1", GROUP="audio"
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_VIDEO}=="1", GROUP="video"

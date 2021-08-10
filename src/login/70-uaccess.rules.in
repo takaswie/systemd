@@ -35,6 +35,7 @@ SUBSYSTEM=="video4linux", TAG+="uaccess"
 SUBSYSTEM=="dvb", TAG+="uaccess"
 
 # industrial cameras, some webcams, camcorders, set-top boxes, TV sets, audio devices, and more
+# These variables come from 'hwdb.d/80-ieee1394-unit-function.hwdb'.
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_MIDI}=="1", TAG+="uaccess"
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_AUDIO}=="1", TAG+="uaccess"
 SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_VIDEO}=="1", TAG+="uaccess"
